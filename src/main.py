@@ -94,6 +94,8 @@ def test_basic_net():
 # generate_data('no_resize_selfLoops_', range(2, 50), 1000, False)
 # hist_data(get_name_list('no_resize_selfLoops_', range(6, 48, (48-6) // 4)))
 
-BasicEnv().run(Net(5, 0, 1))
+BasicEnv().run(Net(3, 0, 1))
+
+
 
 # test_landscape()

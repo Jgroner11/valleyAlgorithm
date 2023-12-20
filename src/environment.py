@@ -12,7 +12,7 @@ class Environment(ABC):
         input_len: size of input to environmnet. This needs to be the same as OUTPUT of net
         type: int
         output_len: size of output to environmnet. This needs to be the same as INPUT of net
-        tpye
+        type
         '''
         self.env_input_len = input_len
         self.env_output_len = output_len
@@ -52,8 +52,9 @@ class Environment(ABC):
                 env.step(net.step(stim=env.get_net_input(), r=env.get_net_reward()))
                 
                 net.draw()
-                net.draw_memory()
-                print(round(net.get_Nodes()[1], 3), env.get_net_reward())
+                net.draw_memory(range_=range(0, 3, 2))
+                # print(round(net.get_Nodes()[1], 3), env.get_net_reward())
+                print(net.get_Nodes(), 'e')
                 pyperclip.copy('(' + str(round(net.get_Nodes()[1], 3)) + ',' + str(env.get_net_reward()) + '),')
 
                 input()

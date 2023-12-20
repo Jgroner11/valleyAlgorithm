@@ -306,19 +306,26 @@ class Memory:
         self.past_states.append(nodes)
         self.past_rewards = np.append(self.past_rewards, r)
         
+    def compute_derivatives(self, nodes):
+        derivatives = np.zeros(self.n)
+        for i in range(self.n):
+            derivatives[i] = self.landscapes[i].f_prime(nodes[i])
+        # print(derivatives)
+        return derivatives
+        
     
     def gradient(self, nodes):
         return np.array([self.landscapes[i].f_prime(nodes[i]) for i in range(self.n)])
     
-    def draw_landscapes(self, fig, range):
+    def draw_landscapes(self, fig, range, nodes):
         axs = fig.get_axes()
         
         for i, node in enumerate(range):
             
             self.landscapes[node].draw(ax=axs[i])
+            axs[i].plot([nodes[i], nodes[i]], [-10, 10], c = 'green', linestyle='-')
             for j, state in enumerate(self.past_states):
-                axs[i].scatter(state[i], self.past_rewards[j], c='blue', alpha=(j / len(self.past_states)), marker='o')
+                axs[i].scatter(state[node], self.past_rewards[j], c='blue', alpha=(j / len(self.past_states)), marker='.')
+
             axs[i].set_title('' + str(node), pad=0, loc='center')
-
-
 

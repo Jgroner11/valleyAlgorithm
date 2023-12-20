@@ -50,8 +50,8 @@ class Net:
         """
 
         self.memory.update(self.nodes, r)
-        # self.randomWeightShift(magnitude=.25)
-        self.randomizeWeights()   
+        self.biasedWeightShift(randomness=.5, learning_rate=0)
+        # self.randomizeWeights()   
         self.nodes = sigmoid(self.weights @ np.hstack((self.nodes, np.array(stim))))
 
         self.last_stim = np.array(stim)
@@ -79,7 +79,14 @@ class Net:
         return (min - max) * (r ** 2) + max
 
     def randomWeightShift(self, magnitude=.05):
-        self.weights = self.weights + (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * .05
+        self.weights = self.weights + (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * magnitude
+        self.weights = np.clip(self.weights, -1.0, 1.0)
+        self.zeroSelfLoops()
+        return self.weights
+    
+    def biasedWeightShift(self, randomness= .05, learning_rate = .05):
+        self.weights = self.weights + (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * randomness + np.ones((self.n-self.input_len, self.n)) * self.memory.compute_derivatives(self.nodes) * learning_rate
+        self.weights = np.clip(self.weights, -1.0, 1.0)
         self.zeroSelfLoops()
         return self.weights
 
@@ -220,7 +227,7 @@ class Net:
             pass # need to update axes of figure or delete fig and create a new one
 
 
-        self.memory.draw_landscapes(self.plt_data['mem_fig'], range_)
+        self.memory.draw_landscapes(self.plt_data['mem_fig'], range_, self.get_Nodes())
                 
 
 
