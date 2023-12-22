@@ -1,8 +1,10 @@
 import numpy as np
+from landscape import Memory
+
+# For drawing graphs
 import networkx as nx
 import matplotlib.pyplot as plt
-
-from landscape import Memory
+from screeninfo import get_monitors
 import my_networkx as my_nx # for updated drawing of labels using bezier curve calculations
 
 
@@ -30,11 +32,12 @@ class Net:
         self.weights = self.randomizeWeights()
         self.memory = Memory(n)
 
-        
+        # For drawing purposes
         self.last_stim = np.ones(self.input_len) * .5
-
-        self.plt_data = {}
-        
+        screen = get_monitors()[0]  # Assuming the primary screen
+        screen_info = {'width_px': screen.width, 'height_px': screen.height, 'width_in': 17.41, 'height_in': 10.3}
+        self.plt_data = {'display_mode': 'hs', 'screen': screen_info}
+        # display_mode can be 'fs' for fullscreen, 'hs' for halfscreen, or anything else for default
         
 
     def step(self, stim=[], r=0):
@@ -63,7 +66,7 @@ class Net:
     def get_Weights(self):
         return self.weights
     
-    # Should be deleted
+    # Deprecated, could be deleted
     def resize(self, resize_factor = .5):
         self.nodes = self.nodes * resize_factor * self.n / np.sum(self.nodes)
         return self.nodes
@@ -93,8 +96,6 @@ class Net:
     def zeroSelfLoops(self):
         self.weights *= np.ones((self.n - self.input_len, self.n)) - np.eye(self.n - self.input_len, self.n)
         return self.weights
-        
-
 
     def draw(self):
         def clear_axis():
@@ -188,7 +189,16 @@ class Net:
 
 
         if 'net_fig' not in self.plt_data:
-            self.plt_data['net_fig'], ax = plt.subplots()
+            if self.plt_data['display_mode'] == 'hs':
+                vertical_padding_in = .35
+                self.plt_data['net_fig'], ax = plt.subplots(figsize = (self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in'] / 2 - vertical_padding_in))
+                plt.get_current_fig_manager().window.wm_geometry("-0+0")
+            elif self.plt_data['display_mode'] == 'fs':
+                self.plt_data['net_fig'], ax = plt.subplots(figsize = (self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in']))
+                plt.get_current_fig_manager().window.wm_geometry("+0+0")
+            else:
+                self.plt_data['net_fig'], ax = plt.subplots()
+                
         else:
             ax = self.plt_data['net_fig'].get_axes()[0]
         
@@ -220,7 +230,15 @@ class Net:
 
         if 'mem_fig' not in self.plt_data:
             (rows, cols) = dim(len(range_))
-            self.plt_data['mem_fig'], axs = plt.subplots(rows, cols)
+            if self.plt_data['display_mode'] == 'hs':
+                vertical_padding_in = .35
+                self.plt_data['mem_fig'], axs = plt.subplots(rows, cols, figsize=(self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in'] / 2 - vertical_padding_in))
+                plt.get_current_fig_manager().window.wm_geometry("-0-0")
+            elif self.plt_data['display_mode'] == 'fs':
+                self.plt_data['mem_fig'], axs = plt.subplots(rows, cols, figsize=(self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in']))
+                plt.get_current_fig_manager().window.wm_geometry("-0+0")
+            else:
+                self.plt_data['mem_fig'], axs = plt.subplots(rows, cols)
             self.plt_data['mem_fig'].tight_layout()
         elif len(range_) > len(self.plt_data['mem_fig'].get_axes()):
             (rows, cols) = dim(len(range_))
@@ -229,10 +247,3 @@ class Net:
 
         self.memory.draw_landscapes(self.plt_data['mem_fig'], range_, self.get_Nodes())
                 
-
-
-
-
-
-        
-
