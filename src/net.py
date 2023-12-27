@@ -1,5 +1,5 @@
 import numpy as np
-from landscape import Memory
+from memory import Memory
 
 # For drawing graphs
 import networkx as nx
@@ -53,7 +53,7 @@ class Net:
         """
 
         self.memory.update(self.nodes, r)
-        self.biasedWeightShift(randomness=.5, learning_rate=0)
+        self.biasedWeightShift(randomness=.35, learning_rate=.15)
         # self.randomizeWeights()   
         self.nodes = sigmoid(self.weights @ np.hstack((self.nodes, np.array(stim))))
 

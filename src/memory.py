@@ -3,6 +3,7 @@ import math
 import bisect
 import numpy as np
 import matplotlib.pyplot as plt
+import my_matplotlib as my_plt
 
 
 # important functions:
@@ -247,15 +248,10 @@ class Landscape:
         fig.canvas.flush_events()
         return (fig, curve)
     
-    def draw(self, ax, num_points=100, axes=(0, 1, -5, 5)):
+    def draw(self, ax, num_points=100, start=0, end=1):
 
-        ax.cla()
-        x = np.arange(num_points) * (axes[1] - axes[0]) / (num_points - 1) + axes[0]
+        x = np.arange(num_points) * (end - start) / (num_points - 1) + start
         y = np.array(self.f(x.tolist()))
-
-        if isinstance(axes, tuple):
-            ax.set_xlim(axes[0], axes[1])
-            ax.set_ylim(axes[2], axes[3])
 
         for peak in self.peaks:
             ax.text(peak.c, self.f(peak.c), round(peak.o, 1), fontsize=8, ha='center')
@@ -317,15 +313,41 @@ class Memory:
     def gradient(self, nodes):
         return np.array([self.landscapes[i].f_prime(nodes[i]) for i in range(self.n)])
     
-    def draw_landscapes(self, fig, range, nodes):
+    def draw_landscapes(self, fig, range, nodes, axes=(0, 1, -4, 4)):
         axs = fig.get_axes()
-        
         for i, node in enumerate(range):
-            
-            self.landscapes[node].draw(ax=axs[i])
-            axs[i].plot([nodes[i], nodes[i]], [-10, 10], c = 'green', linestyle='-')
+            axs[i].cla()
+            if isinstance(axes, tuple):
+                axs[i].set_xlim(axes[0], axes[1])
+                axs[i].set_ylim(axes[2], axes[3])            
+
             for j, state in enumerate(self.past_states):
                 axs[i].scatter(state[node], self.past_rewards[j], c='blue', alpha=(j / len(self.past_states)), marker='.')
+
+            c = self.landscapes[node].f_prime(nodes[node])
+            x = nodes[node]
+            y = self.landscapes[node].f(nodes[node])
+            dx = 1 / math.sqrt(c ** 2 + 1)
+            dy = c / math.sqrt(c ** 2 + 1)
+
+            # When the aspect ratio does not equal 1, a line segment of true distance 1 has a different on screen distance depending on the slope
+            # To combat this, we compute the onscreen distance in terms of the units of the x-axis in order to keep the onscreen distance constant
+            r = my_plt.get_aspect(axs[i])
+            dox = math.sqrt(dx**2 + (dy* r)**2)
+
+            # Current x position
+            axs[i].plot([x, x], [axes[2], axes[3]], c = 'green', linestyle='-')
+            
+            # Strength of derivative
+            WEIGHT_SHIFT_MAG = .025 
+            axs[i].arrow(x, axes[3] - 1, WEIGHT_SHIFT_MAG * c, 0, head_width=.15, head_length=.01, length_includes_head = True, fc='green', ec='green')
+            
+            # memory function
+            self.landscapes[node].draw(ax=axs[i])
+
+            # directional derivative
+            GRADIENT_SCALE_FACTOR = .075 
+            axs[i].annotate("", xy=(x + GRADIENT_SCALE_FACTOR * dx / dox, y + GRADIENT_SCALE_FACTOR * dy / dox), xytext=(x, y), arrowprops=dict(arrowstyle="->", shrinkA=0))
 
             axs[i].set_title('' + str(node), pad=0, loc='center')
 

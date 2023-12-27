@@ -54,7 +54,7 @@ class Environment(ABC):
                 net.draw()
                 net.draw_memory()
                 # print(round(net.get_Nodes()[1], 3), env.get_net_reward())
-                print(net.get_Nodes(), 'e')
+                # print(net.get_Nodes(), 'e')
                 pyperclip.copy('(' + str(round(net.get_Nodes()[1], 3)) + ',' + str(env.get_net_reward()) + '),')
 
                 input()
