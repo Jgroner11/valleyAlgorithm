@@ -28,7 +28,8 @@ class Net:
         self.input_len = input_len
         self.output_len = output_len
 
-        self.nodes = np.random.rand(n-self.input_len).T # Node 0 to node output_len - 1 are the output nodes
+        self.nodes = np.random.rand(n-self.input_len) # Node 0 to node output_len - 1 are the output nodes
+        # self.nodes = np.ones(n-self.input_len) * .5 # Node 0 to node output_len - 1 are the output nodes
         self.weights = self.randomizeWeights()
         self.memory = Memory(n)
 
@@ -53,7 +54,7 @@ class Net:
         """
 
         self.memory.update(self.nodes, r)
-        self.biasedWeightShift(randomness=.35, learning_rate=.15)
+        self.biasedWeightShift(randomness=.4, learning_rate=.05)
         # self.randomizeWeights()   
         self.nodes = sigmoid(self.weights @ np.hstack((self.nodes, np.array(stim))))
 
@@ -88,7 +89,9 @@ class Net:
         return self.weights
     
     def biasedWeightShift(self, randomness= .05, learning_rate = .05):
-        self.weights = self.weights + (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * randomness + np.ones((self.n-self.input_len, self.n)) * self.memory.compute_derivatives(self.nodes) * learning_rate
+        a = (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * randomness
+        b = (np.ones((self.n-self.input_len, self.n)) * self.memory.compute_derivatives(self.nodes)).T * learning_rate
+        self.weights += a + b
         self.weights = np.clip(self.weights, -1.0, 1.0)
         self.zeroSelfLoops()
         return self.weights
