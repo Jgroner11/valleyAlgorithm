@@ -6,6 +6,30 @@ import networkx as nx
 import numpy as np
 import math
 
+def set_fig_position(x=0, y=0):
+    """
+    Cross-backend figure window positioning.
+    Works on TkAgg (wm_geometry) and Qt (move).
+    """
+    mgr = plt.get_current_fig_manager()
+    if not hasattr(mgr, "window"):
+        return
+
+    w = mgr.window
+
+    # Tk backend (TkAgg)
+    if hasattr(w, "wm_geometry"):
+        w.wm_geometry(f"+{x}+{y}")
+        return
+
+    # Qt backend (QtAgg / Qt5Agg)
+    if hasattr(w, "move"):
+        try:
+            w.move(x, y)
+        except Exception:
+            pass
+
+
 def __rotate_vector(vector, theta):
     # theta is angle in radians
     # Create the rotation matrix

@@ -194,10 +194,10 @@ class Net:
             if self.plt_data['display_mode'] == 'hs':
                 vertical_padding_in = .35
                 self.plt_data['net_fig'], ax = plt.subplots(figsize = (self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in'] / 2 - vertical_padding_in))
-                plt.get_current_fig_manager().window.wm_geometry("-0+0")
+                my_nx.set_fig_position(0, 0)
             elif self.plt_data['display_mode'] == 'fs':
                 self.plt_data['net_fig'], ax = plt.subplots(figsize = (self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in']))
-                plt.get_current_fig_manager().window.wm_geometry("+0+0")
+                my_nx.set_fig_position(0, 0)
             else:
                 self.plt_data['net_fig'], ax = plt.subplots()
                 
@@ -235,10 +235,10 @@ class Net:
             if self.plt_data['display_mode'] == 'hs':
                 vertical_padding_in = .35
                 self.plt_data['mem_fig'], axs = plt.subplots(rows, cols, figsize=(self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in'] / 2 - vertical_padding_in))
-                plt.get_current_fig_manager().window.wm_geometry("-0-0")
+                my_nx.set_fig_position(0, 0)
             elif self.plt_data['display_mode'] == 'fs':
                 self.plt_data['mem_fig'], axs = plt.subplots(rows, cols, figsize=(self.plt_data['screen']['width_in'] / 2, self.plt_data['screen']['height_in']))
-                plt.get_current_fig_manager().window.wm_geometry("-0+0")
+                my_nx.set_fig_position(0, 0)
             else:
                 self.plt_data['mem_fig'], axs = plt.subplots(rows, cols)
             self.plt_data['mem_fig'].tight_layout()
