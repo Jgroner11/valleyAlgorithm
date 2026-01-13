@@ -303,8 +303,8 @@ class Memory:
         self.past_rewards = np.append(self.past_rewards, r)
         
     def compute_derivatives(self, nodes):
-        derivatives = np.zeros(self.n)
-        for i in range(self.n):
+        derivatives = np.zeros(len(nodes))
+        for i in range(len(nodes)):
             derivatives[i] = self.landscapes[i].f_prime(nodes[i])
         # print(derivatives)
         return derivatives

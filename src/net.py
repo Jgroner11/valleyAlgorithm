@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from screeninfo import get_monitors
 import my_networkx as my_nx # for updated drawing of labels using bezier curve calculations
 
-
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
@@ -29,12 +28,12 @@ class Net:
         self.output_len = output_len
 
         self.nodes = np.random.rand(n-self.input_len) # Node 0 to node output_len - 1 are the output nodes
-        # self.nodes = np.ones(n-self.input_len) * .5 # Node 0 to node output_len - 1 are the output nodes
+        self.last_stim = np.ones(self.input_len) * .5 # ought to be renamed
         self.weights = self.randomizeWeights()
         self.memory = Memory(n)
 
+
         # For drawing purposes
-        self.last_stim = np.ones(self.input_len) * .5
         screen = get_monitors()[0]  # Assuming the primary screen
         screen_info = {'width_px': screen.width, 'height_px': screen.height, 'width_in': 17.41, 'height_in': 10.3}
         self.plt_data = {'display_mode': 'hs', 'screen': screen_info}
@@ -52,13 +51,13 @@ class Net:
         :return: the output nodes
         :rtype: np.array
         """
-
-        self.memory.update(self.nodes, r)
-        self.biasedWeightShift(randomness=.4, learning_rate=.05)
+        stim = np.array(stim)
+        self.memory.update(np.hstack((self.nodes, self.last_stim)), r)
+        self.biasedWeightShift(randomness=.1, learning_rate=.1)
         # self.randomizeWeights()   
-        self.nodes = sigmoid(self.weights @ np.hstack((self.nodes, np.array(stim))))
+        self.nodes = sigmoid(self.weights @ np.hstack((self.nodes, stim)))
 
-        self.last_stim = np.array(stim)
+        self.last_stim = stim
         return self.nodes[:self.output_len]
     
     def get_Nodes(self):
@@ -90,7 +89,7 @@ class Net:
     
     def biasedWeightShift(self, randomness= .05, learning_rate = .05):
         a = (2 * np.random.rand(self.n-self.input_len, self.n) - 1) * randomness
-        b = (np.ones((self.n-self.input_len, self.n)) * self.memory.compute_derivatives(self.nodes)).T * learning_rate
+        b = np.ones((self.n-self.input_len, self.n)) * self.memory.compute_derivatives(self.nodes)[:,np.newaxis] / self.n * learning_rate
         self.weights += a + b
         self.weights = np.clip(self.weights, -1.0, 1.0)
         self.zeroSelfLoops()
@@ -248,5 +247,5 @@ class Net:
             pass # need to update axes of figure or delete fig and create a new one
 
 
-        self.memory.draw_landscapes(self.plt_data['mem_fig'], range_, self.get_Nodes())
+        self.memory.draw_landscapes(self.plt_data['mem_fig'], range_, np.hstack((self.nodes, self.last_stim)))
                 

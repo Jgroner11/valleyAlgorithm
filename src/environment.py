@@ -49,14 +49,13 @@ class Environment(ABC):
         if iters==None:
             plt.ion()
             while True:
-                env.step(net.step(stim=env.get_net_input(), r=env.get_net_reward()))
-                
+                # print('Net Input:', round(env.get_net_input()[0], 2))
+                net_output = net.step(stim=env.get_net_input(), r=env.get_net_reward())
+                print('Net Output:', round(net_output[0], 2))
+                env.step(net_output)
+                print('Reward:', env.get_net_reward())
                 net.draw()
                 net.draw_memory()
-                # print(round(net.get_Nodes()[1], 3), env.get_net_reward())
-                # print(net.get_Nodes(), 'e')
-                pyperclip.copy('(' + str(round(net.get_Nodes()[1], 3)) + ',' + str(env.get_net_reward()) + '),')
-
                 input()
 
         else:
@@ -109,3 +108,30 @@ class BasicEnv(Environment):
         Returns the net reward level based on the current state
         '''
         return self.state['r']
+
+class CopyEnv(Environment):
+    def __init__(self):
+        super().__init__(1, 1)
+        self.state = {'age' : 0, 'cur' : 0, 'r': 0}
+    
+    def step(self, net_output):
+        self.state['age'] += 1
+        if self.state['cur'] == 0 and net_output[0] < .5 or self.state['cur'] == 1 and net_output[0] >= .5:
+            self.state['r'] = 1
+        else:
+            self.state['r'] = -1
+
+        self.state['cur'] = np.random.randint(0,2)
+
+    def get_net_input(self):
+        return [self.state['cur']]
+
+    def get_net_reward(self):
+        return self.state['r']
+        
+
+class AndEnvironmnet(Environment):
+    pass
+
+class OrEnvironment(Environment):
+    pass
